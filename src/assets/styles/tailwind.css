@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*  Adicione um reset para a largura do popup aqui */
+body {
+  width: 350px;
+  height: 600px;
+}
+
+/* classes auxiliares */
+.status-dot.success { background-color: #10b981 !important; }
+.status-dot.error   { background-color: #ef4444 !important; }
+.status-dot.warning { background-color: #f59e0b !important; }
+
+.text-emerald { color: #10b981 !important; }
+.text-red     { color: #ef4444 !important; }
+.text-yellow  { color: #f59e0b !important; }
