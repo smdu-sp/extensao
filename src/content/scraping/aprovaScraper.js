@@ -25,6 +25,7 @@ export class AprovaScraper extends BaseScraper {
          * @type {Object} 
          */
         this.targets = scraperTargets.aprova_digital;
+        this.parent = scraperTargets.aprova_digital.parent
     }
 
     /**
@@ -39,12 +40,12 @@ export class AprovaScraper extends BaseScraper {
     async getTechniciansName() {
         if (typeof chrome === 'undefined' || !chrome.runtime?.id) return "";
 
-        const target = this.targets.usuarios_page;
+        const {tecnico} = this.targets.usuarios_page;
 
         // Aguarda renderização de elementos assíncronos
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        const element = document.querySelector(target.tecnico);
+        const element = document.querySelector(tecnico);
 
         // Caso o elemento exista na página (ex: página de Perfil/Inbox), atualiza o storage
         if (element) {
@@ -72,7 +73,9 @@ export class AprovaScraper extends BaseScraper {
     extract() {
         this.logStart();
 
-        const rows = document.querySelectorAll(this.targets.parent);
+        const {parent,processo,num_sei,requerimento,requerente,proprietario,criado_em,ultima_acao,status} = this.targets
+
+        const rows = document.querySelectorAll(this.parent);
 
         return Array.from(rows)
             .filter((row) => {
@@ -81,14 +84,14 @@ export class AprovaScraper extends BaseScraper {
             })
             .map(row => ({
                 sistema: "Aprova Digital - Todos os Processos",
-                processo: this.getText(row, this.targets.processo),
-                num_sei: this.getText(row, this.targets.num_sei),
-                requerimento: this.getText(row, this.targets.requerimento),
-                requerente: this.getText(row, this.targets.requerente),
-                proprietario: this.getText(row, this.targets.proprietario),
-                criado_em: this.getText(row, this.targets.criado_em),
-                ultima_acao: this.getText(row, this.targets.ultima_acao),
-                status: this.getText(row, this.targets.status),
+                processo: this.getText(row, processo),
+                num_sei: this.getText(row, num_sei),
+                requerimento: this.getText(row, requerimento),
+                requerente: this.getText(row, requerente),
+                proprietario: this.getText(row, proprietario),
+                criado_em: this.getText(row, criado_em),
+                ultima_acao: this.getText(row, ultima_acao),
+                status: this.getText(row, status),
                 data_consulta: new Date().toLocaleDateString('pt-BR'),
             }));
     }
@@ -101,7 +104,9 @@ export class AprovaScraper extends BaseScraper {
      * @returns {Promise<Array<Object>>} Lista de processos do usuário.
      */
     async extractByUser() {
-        const target = this.targets.usuarios_page;
+
+        const {processo,requerimento,requerente,recebido_em} = this.targets.usuarios_page;
+
         this.logStart();
 
         const url = window.location.href;
@@ -111,7 +116,7 @@ export class AprovaScraper extends BaseScraper {
             return [];
         }
 
-        const rows = document.querySelectorAll(this.targets.parent);
+        const rows = document.querySelectorAll(this.parent);
         const tecnicoNome = await this.getTechniciansName();
 
         return Array.from(rows)
@@ -119,10 +124,10 @@ export class AprovaScraper extends BaseScraper {
             .map(row => ({
                 sistema: "Aprova Digital - Usuários",
                 tecnico: tecnicoNome,
-                processo: this.getText(row, target.processo),
-                requerimento: this.getText(row, target.requerimento),
-                requerente: this.getText(row, target.requerente),
-                recebido_em: this.getText(row, target.recebido_em),
+                processo: this.getText(row, processo),
+                requerimento: this.getText(row, requerimento),
+                requerente: this.getText(row, requerente),
+                recebido_em: this.getText(row, recebido_em),
                 data_consulta: new Date().toLocaleDateString('pt-BR')
             }));
     }
@@ -136,9 +141,10 @@ export class AprovaScraper extends BaseScraper {
      * @returns {Promise<string>} Nome da caixa detectada (ex: "Minha Caixa", "Equipe").
      */
     async #getInboxName() {
+        const {caixa} = this.targets.inbox_page
         await new Promise(r => setTimeout(r, 500));
 
-        const tabs = document.querySelectorAll(this.targets.inbox_page.caixa);
+        const tabs = document.querySelectorAll(caixa);
         let detectedName = "Caixa não identificada";
 
         for (const tab of tabs) {
@@ -156,7 +162,7 @@ export class AprovaScraper extends BaseScraper {
             }
         }
 
-        console.log("📍 Caixa Ativa Detectada:", detectedName);
+        console.log("Caixa Ativa Detectada:", detectedName);
         await chrome.storage.local.set({ caixa_atual: detectedName });
         return detectedName;
     }
@@ -169,8 +175,9 @@ export class AprovaScraper extends BaseScraper {
     async extractByInbox() {
         this.logStart();
 
-        const target = this.targets.inbox_page;
-        const rows = document.querySelectorAll(this.targets.parent);
+        const {processo,num_sei,taxas,requerimento,requerente,recebido_em} = this.targets.inbox_page;
+
+        const rows = document.querySelectorAll(this.parent);
         const inboxName = await this.#getInboxName();
 
         // Aguarda renderização final da lista
@@ -180,12 +187,12 @@ export class AprovaScraper extends BaseScraper {
             .filter((row) => row.getBoundingClientRect().height > 0)
             .map(row => ({
                 sistema: `Aprova Digital - Caixa: ${inboxName}`,
-                processo: this.getText(row, target.processo),
-                num_sei: this.getText(row, target.num_sei),
-                taxas: this.getText(row, target.taxas),
-                requerimento: this.getText(row, target.requerimento),
-                requerente: this.getText(row, target.requerente),
-                recebido_em: this.getText(row, target.recebido_em),
+                processo: this.getText(row, processo),
+                num_sei: this.getText(row, num_sei),
+                taxas: this.getText(row, taxas),
+                requerimento: this.getText(row, requerimento),
+                requerente: this.getText(row, requerente),
+                recebido_em: this.getText(row, recebido_em),
                 data_consulta: new Date().toLocaleDateString('pt-BR')
             }));
     }
