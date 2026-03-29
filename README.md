@@ -1,147 +1,79 @@
-# 🏙️ UrbSync - Extrator de Processos
+
+# 🏙️ UrbSync - Automação e Extração de Processos
 
 <p align="center">
-<img src="src/assets/images/urbsync_thumb.png" alt="UrbSync Cover" width="700">
+  <img src="src/assets/images/project_humb.png" alt="UrbSync Cover" width="800">
 </p>
 
-## 1. Visão Geral
+<p align="center">
+  <a href="https://urbsync.vercel.app/">🌐 Site Oficial</a> • 
+</p>
 
-O **UrbSync** é uma extensão de navegador (Manifest V3) projetada para a Secretaria Municipal de Urbanismo e Licenciamento (SMUL - SP). Sua função primária é a **interoperabilidade de dados**: extrair informações estruturadas dos portais **Aprova Digital** e **SEI**, processá-las em memória e exportá-las para planilhas Excel (.xlsx) formatadas.
+## 💡 O Problema e a Solução
 
----
+Analisar processos urbanísticos exige a compilação de dezenas de dados espalhados por diferentes portais governamentais. Fazer isso manualmente gera perda de tempo, inconsistência de dados e retrabalho.
 
-## 2. Tecnologias e Dependências
+O **UrbSync** nasceu dentro da Secretaria Municipal de Urbanismo e Licenciamento de São Paulo (SMUL - SP) para resolver exatamente isso. Ele atua como uma ponte de **interoperabilidade de dados**, transformando horas de cópia e cola manual em um fluxo automatizado de apenas um clique. A extensão extrai, higieniza e estrutura as informações dos portais **Aprova Digital** e **SEI**, gerando planilhas Excel prontas para uso.
 
-* **Linguagem Core:** JavaScript (ES6+).
-* **Arquitetura:** Chrome Extension API - Manifest V3.
-* **Interface:** Tailwind CSS (via injeção ou popup).
-* **Manipulação de Dados:** [ExcelJS](https://github.com/exceljs/exceljs) (Processamento de arquivos em buffer).
-* **Estilização de UI:** Ícones e componentes customizados para a identidade visual da SMUL.
+## ✨ Principais Recursos
 
----
-
-## 3. Arquitetura e Engenharia de Software
-
-O projeto foi construído sob o paradigma da **Programação Orientada a Objetos (POO)** e segue padrões de projeto (Design Patterns) para garantir que a ferramenta não se torne obsoleta com mudanças nos portais.
-
-### 3.1 Padrões de Projeto Utilizados:
-
-1. **Factory Pattern & Polimorfismo:** A classe `ScraperFactory` decide, em tempo de execução, qual motor de extração utilizar. As classes `SeiScraper` e `AprovaScraper` herdam de uma `BaseScraper`, garantindo que o método `.extract()` seja consistente, independente do site.
-2. **Dynamic Import Loader:** Para contornar as restrições de *ES Modules* em *Content Scripts* no Manifest V3, o projeto utiliza um *Bootstrapper* (`loader.js`) que injeta os módulos dinamicamente.
-3. **Encapsulamento de API:** A comunicação entre o Popup e a Página foi "promisificada", incluindo tratamento resiliente de erros para falhas de injeção.
+* **🚀 Extração em Um Clique:** Captura dezenas de campos complexos de processos em milissegundos.
+* **📊 Exportação Nativa (.xlsx):** Gera planilhas Excel formatadas, com dados tipados e limpos, prontos para análise.
+* **🧠 Acúmulo de Contexto:** Capacidade de navegar por múltiplas páginas de processos e extrair todos para um único arquivo unificado.
+* **🔒 100% Client-Side:** Todo o processamento ocorre no navegador do usuário. Zero dados enviados para a nuvem. Conformidade total com a LGPD.
+* **🎨 UI/UX Integrada:** Interface limpa, minimalista e desenhada com a identidade visual institucional, garantindo facilidade de uso para qualquer servidor ou usuário.
 
 ---
 
-## 4. Desafios do Manifest V3 e Soluções
+## 🛠️ Engenharia e Arquitetura
 
-A migração para o Manifest V3 impôs restrições de segurança severas que foram contornadas da seguinte forma:
+O UrbSync não é apenas um script de raspagem de dados; ele foi desenhado com **Programação Orientada a Objetos (POO)** e padrões de projeto para garantir escalabilidade e resistência a mudanças nos portais alvo.
 
-* **Execução do ExcelJS:** Como scripts de conteúdo possuem restrições de CSP (Content Security Policy), o processamento pesado do ExcelJS é delegado ao **Background Service Worker**. Os dados são enviados via mensagens e o download é gerenciado pela API `chrome.downloads`.
-* **Isolamento de Contexto:** A extensão utiliza "Isolated Worlds", garantindo que as variáveis do UrbSync não conflitem com os scripts globais do SEI ou Aprova Digital.
-
----
-
-## 5. Estrutura de Diretórios
-
-```text
-/urbsync
-│
-├── manifest.json                 # Configurações de permissões e segurança
-│
-├── /src
-│   ├── /background
-│   │   └── background.js         # Service Worker (Gerencia a API chrome.downloads)
-│   │
-│   ├── /content
-│   │   ├── /core
-│   │   │   ├── loader.js         # Bootstrapper para carregamento de módulos
-│   │   │   └── actions.js        # Maestro dos eventos na página ativa
-│   │   ├── /modules
-│   │   │   ├── scrapers/         # Classes polimórficas (Aprova/SEI/Base)
-│   │   │   └── detect-route.js   # Lógica de identificação de URL
-│   │   └── /services
-│   │       └── excel-service.js  # Conversão de dados (Buffer -> Base64)
-│   │
-│   ├── /popup
-│   │   ├── index.html            # Interface de usuário (Painel de controle)
-│   │   ├── popup.js              # Listeners e lógica de UI
-│   │   └── set-status.js         # Helper para feedback visual (Tailwind)
-│   │
-│   └── /shared
-│       ├── /constants            # Dicionário de seletores CSS (Scraper.js)
-│       └── /utils                # Gerenciador de Storage (Local Storage API)
-│
-└── /assets                       # Recursos visuais (Ícones 16x, 48x, 128x)
-
-```
+* **Tech Stack:** JavaScript (ES6+), Manifest V3, Tailwind CSS, ExcelJS.
+* **Factory Pattern & Polimorfismo:** A inteligência da extensão reside na `ScraperFactory`. Ela identifica dinamicamente o portal (Aprova ou SEI) e invoca a classe correspondente. Todas herdam de `BaseScraper`, mantendo o contrato do método `.extract()` intacto.
+* **Manifest V3 Ready:** Contornamos as pesadas restrições do Manifest V3 delegando o processamento do *ExcelJS* para o **Background Service Worker** e garantindo isolamento total de contexto (Isolated Worlds) para não conflitar com as páginas da prefeitura.
 
 ---
 
-## 6. Fluxo de Dados e Manipulação
+## 👨‍💻 Para Desenvolvedores e Equipe de TI
 
-1. **Trigger:** O usuário clica em "Extrair" no Popup.
-2. **Handshake:** O Popup envia uma mensagem para o `actions.js` via `chrome.tabs.sendMessage`.
-3. **Extração:** A `ScraperFactory` identifica o portal, instancia o Scraper correto e varre o DOM ignorando elementos com `display: none`.
-4. **Tratamento:** Os dados passam por uma sanitização (limpeza de espaços, formatação de datas e moedas).
-5. **Persistência:** Os dados são salvos no `chrome.storage.local`, permitindo acumular processos de diferentes páginas.
-6. **Exportação:** O `ExcelJS` gera o arquivo, e o `background.js` dispara o download nativo do navegador.
+Abaixo, os passos para rodar o projeto localmente ou realizar manutenções nas regras de negócio.
 
----
+### Instalação e Build Local
 
-## 7. Guia de Manutenção para a Equipe de T.I.
+1. Instale as dependências:
+   ```bash
+   npm install
+   ```
+2. Gere a build de produção:
+   ```bash
+   npm run build
+   ```
+3. No Chrome, acesse `chrome://extensions/`, ative o **Modo do Desenvolvedor**, clique em **Carregar sem compactação** e selecione a pasta raiz do projeto.
 
-### Como atualizar seletores quebrados?
+### Guia Rápido de Manutenção
 
-Se o Aprova Digital mudar o ID de um campo, não é necessário mexer na lógica core.
+Como os portais governamentais podem sofrer atualizações de interface, o UrbSync foi feito para ser fácil de consertar:
 
-* **Arquivo:** `/src/shared/constants/scraper.js`
-* **Ação:** Atualize o valor da chave correspondente ao seletor CSS.
-
-### Como adicionar um novo sistema (ex: SLCE)?
-
-1. Crie `SlceScraper.js` em `/scrapers/` herdando de `BaseScraper`.
-2. Implemente o método `extract()`.
-3. Adicione a nova rota no arquivo `detect-route.js`.
-
----
-
-## 8. Instalação e Build
-
-Para garantir a integridade dos módulos, siga estes passos:
-
-1. **Dependências:**
-```bash
-npm install
-
-```
-
-
-2. **Build de Produção:**
-```bash
-npm run build
-
-```
-
-3. **Sideloading no Chrome:**
-* Acesse `chrome://extensions/`.
-* Ative o **Modo do Desenvolvedor**.
-* Clique em **Carregar sem compactação** e selecione a pasta raiz.
+* **Os seletores pararam de funcionar?**
+  Não mexa na lógica de extração. Basta ir no dicionário central em `/src/shared/constants/scraper.js` e atualizar a string do seletor CSS correspondente.
+* **Como adicionar um novo sistema (ex: SLCE)?**
+  1. Crie `SlceScraper.js` na pasta `/scrapers/`, estendendo `BaseScraper`.
+  2. Implemente a regra específica no método `extract()`.
+  3. Registre a nova rota no `detect-route.js`.
 
 ---
 
-## 9. Segurança e LGPD
+## 🛡️ Segurança e Privacidade
 
-O UrbSync foi projetado para ser **Client-Side Only**.
-
-* Nenhum dado sai da máquina do servidor/funcionário para servidores externos.
-* A extensão não coleta histórico de navegação fora dos domínios `*.prefeitura.sp.gov.br`.
-* O armazenamento local é temporário e pode ser limpo pelo usuário a qualquer momento através da interface da extensão.
-
----
-
-**Documentação atualizada em:** Fevereiro de 2026
-**Responsável:** [Victor Kiss](https://www.linkedin.com/in/victor-kiss) (Desenvolvedor Front-end / SMUL)
-
+O UrbSync lida com processos públicos, mas foi construído sob o princípio de "Privacy by Design":
+* A extensão não possui servidores de backend (Backendless).
+* Só é ativada em domínios estritamente necessários (`*.prefeitura.sp.gov.br`).
+* O armazenamento (`chrome.storage.local`) é volátil, mantido apenas durante a sessão de extração e pode ser apagado com um clique na interface.
 
 ---
 
+**Criado e mantido por:** [Victor Kiss](https://www.linkedin.com/in/victor-kiss) 
+*Desenvolvedor Front-end*
+
+---
