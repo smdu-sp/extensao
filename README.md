@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://urbsync.vercel.app/">🌐 Site Oficial</a> • 
+  <a href="https://urbsync.vercel.app/">🌐 Site Oficial</a>  
 </p>
 
 ## 💡 O Problema e a Solução
