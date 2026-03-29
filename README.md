@@ -2,7 +2,7 @@
 # 🏙️ UrbSync - Automação e Extração de Processos
 
 <p align="center">
-  <img src="src/assets/images/project_humb.png" alt="UrbSync Cover" width="800">
+  <img src="src/assets/images/project_thumb.png" alt="UrbSync Cover" width="800">
 </p>
 
 <p align="center">
